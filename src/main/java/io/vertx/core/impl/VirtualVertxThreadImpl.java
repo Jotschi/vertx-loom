@@ -61,7 +61,7 @@ public class VirtualVertxThreadImpl implements VertxThread {
 	}
 
 	@Override
-	public Thread getThread() {
+	public Thread unwrap() {
 		return instance;
 	}
 
