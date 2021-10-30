@@ -1,16 +1,12 @@
 package io.vertx.core.it;
 
-import static org.junit.Assert.fail;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import org.junit.Test;
 
 import io.vertx.core.Vertx;
 import io.vertx.loom.core.LoomHelper;
+import io.vertx.test.core.AsyncTestBase;
 
-public class LoomHelperTest {
+public class LoomHelperTest extends AsyncTestBase {
 
 	@Test
 	public void testExecuteErrorHandling() {
@@ -20,6 +16,18 @@ public class LoomHelperTest {
 		});
 	}
 
+	@Test
+	public void testExecute() {
+		Vertx vertx = Vertx.vertx();
+		vertx.runOnContext(e -> {
+			LoomHelper.execute(() -> {
+				System.out.println("Done");
+				testComplete();
+			});
+		});
+		await();
+	}
+
 	@Test(expected = NullPointerException.class)
 	public void testExecuteOutside() {
 		LoomHelper.execute(() -> new RuntimeException("Bäm"));
@@ -27,7 +35,6 @@ public class LoomHelperTest {
 
 	@Test
 	public void testNesting() throws InterruptedException {
-		CountDownLatch latch = new CountDownLatch(1);
 		Vertx vertx = Vertx.vertx();
 		vertx.runOnContext(e -> {
 			LoomHelper.execute(() -> {
@@ -35,15 +42,12 @@ public class LoomHelperTest {
 					LoomHelper.execute(() -> {
 						LoomHelper.execute(() -> {
 							System.out.println("Done");
-							latch.countDown();
+							testComplete();
 						});
 					});
 				});
 			});
 		});
-
-		if (!latch.await(1, TimeUnit.SECONDS)) {
-			fail("Timeout reached");
-		}
+		await();
 	}
 }
