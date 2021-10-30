@@ -20,7 +20,7 @@ public final class LoomHelper {
 
 		if (asyncContext == null) {
 			Context vertxContext = Objects.requireNonNull(Vertx.currentContext(),
-					"This thread needs a Vertx Context to use async/await");
+					"This thread needs a Vertx Context to use execute");
 
 			Executor contextThreadExecutor = command -> {
 				vertxContext.runOnContext(v -> command.run());
