@@ -19,7 +19,7 @@ package io.vertx.loom.ext.web;
 import java.util.function.Function;
 
 import io.vertx.core.Handler;
-import io.vertx.loom.core.LoomHelper;
+import io.vertx.loom.core.Async;
 
 /**
  * A route is a holder for a set of criteria which determine whether an HTTP request or failure should be routed
@@ -155,7 +155,7 @@ public class Route {
   public io.vertx.loom.ext.web.Route handler(io.vertx.core.Handler<io.vertx.loom.ext.web.RoutingContext> requestHandler) { 
     delegate.handler(new Handler<io.vertx.ext.web.RoutingContext>() {
       public void handle(io.vertx.ext.web.RoutingContext event) {
-        LoomHelper.execute(() -> {
+        Async.async(() -> {
           requestHandler.handle(io.vertx.loom.ext.web.RoutingContext.newInstance((io.vertx.ext.web.RoutingContext)event));
         });
       }

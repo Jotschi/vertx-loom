@@ -153,8 +153,9 @@ public class Vertx implements Measured {
    * @return The current context or <code>null</code> if there is no current context
    */
   public static io.vertx.loom.core.Context currentContext() {
-    if(Thread.currentThread().isVirtual()) {
-      return LoomHelper.currentVertxContext();
+    if (Thread.currentThread().isVirtual()) {
+      io.vertx.loom.core.Context ret = io.vertx.loom.core.Context.newInstance((io.vertx.core.Context)Async.currentVertxContext());
+      return ret; 
     } else {
       io.vertx.loom.core.Context ret = io.vertx.loom.core.Context.newInstance((io.vertx.core.Context)io.vertx.core.Vertx.currentContext());
       return ret;

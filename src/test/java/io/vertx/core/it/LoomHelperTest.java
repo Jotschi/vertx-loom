@@ -3,7 +3,7 @@ package io.vertx.core.it;
 import org.junit.Test;
 
 import io.vertx.core.Vertx;
-import io.vertx.loom.core.LoomHelper;
+import io.vertx.loom.core.Async;
 import io.vertx.test.core.AsyncTestBase;
 
 public class LoomHelperTest extends AsyncTestBase {
@@ -12,7 +12,7 @@ public class LoomHelperTest extends AsyncTestBase {
 	public void testExecuteErrorHandling() {
 		Vertx vertx = Vertx.vertx();
 		vertx.runOnContext(e -> {
-			LoomHelper.execute(() -> new RuntimeException("Bäm"));
+			Async.async(() -> new RuntimeException("Bäm"));
 		});
 	}
 
@@ -20,8 +20,8 @@ public class LoomHelperTest extends AsyncTestBase {
 	public void testExecute() {
 		Vertx vertx = Vertx.vertx();
 		vertx.runOnContext(e -> {
-			LoomHelper.execute(() -> {
-				System.out.println("Done");
+			Async.async(() -> {
+				assertEquals("vert.x-virtual-thread-0", Thread.currentThread().getName());
 				testComplete();
 			});
 		});
@@ -30,18 +30,18 @@ public class LoomHelperTest extends AsyncTestBase {
 
 	@Test(expected = NullPointerException.class)
 	public void testExecuteOutside() {
-		LoomHelper.execute(() -> new RuntimeException("Bäm"));
+		Async.async(() -> new RuntimeException("Bäm"));
 	}
 
 	@Test
 	public void testNesting() throws InterruptedException {
 		Vertx vertx = Vertx.vertx();
 		vertx.runOnContext(e -> {
-			LoomHelper.execute(() -> {
-				LoomHelper.execute(() -> {
-					LoomHelper.execute(() -> {
-						LoomHelper.execute(() -> {
-							System.out.println("Done");
+			Async.async(() -> {
+				Async.async(() -> {
+					Async.async(() -> {
+						Async.async(() -> {
+							assertEquals("vert.x-virtual-thread-3", Thread.currentThread().getName());
 							testComplete();
 						});
 					});

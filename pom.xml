@@ -16,11 +16,6 @@
 			<artifactId>vertx-web</artifactId>
 			<version>${vertx.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>com.augustnagro</groupId>
-			<artifactId>vertx-async-await</artifactId>
-			<version>0.1.1-SNAPSHOT</version>
-		</dependency>
 
 		<!-- Test -->
 		<dependency>
