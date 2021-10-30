@@ -23,7 +23,7 @@ public class LoomRouterTest extends AsyncTestBase {
 			client.request(HttpMethod.GET, 8080, "localhost", "/test", onSuccess(req -> {
 				req.send(onSuccess(resp -> {
 					resp.bodyHandler(buff -> {
-						assertEquals("vertx-virtual-thread-0", buff.toString());
+						assertEquals("vert.x-virtual-thread-0", buff.toString());
 						testComplete();
 					});
 				}));

@@ -26,7 +26,7 @@ public final class LoomHelper {
 				vertxContext.runOnContext(v -> command.run());
 			};
 
-			ThreadFactory vtFactory = Thread.ofVirtual().name("vertx-virtual-thread-", 0)
+			ThreadFactory vtFactory = Thread.ofVirtual().name("vert.x-virtual-thread-", 0)
 					.scheduler(contextThreadExecutor).factory();
 			asyncContext = new AsyncContext(vertxContext, vtFactory);
 			ASYNC_CONTEXT.set(asyncContext);
@@ -42,5 +42,11 @@ public final class LoomHelper {
 				throw t;
 			}
 		}).start();
+	}
+
+	public static Context currentVertxContext() {
+		AsyncContext asyncContext = ASYNC_CONTEXT.get();
+		Context context = asyncContext.vertxContext;
+		return context;
 	}
 }
