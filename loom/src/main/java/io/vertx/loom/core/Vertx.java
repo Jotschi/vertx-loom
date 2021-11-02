@@ -23,6 +23,7 @@ import io.vertx.core.TimeoutStream;
 import io.vertx.core.WorkerExecutor;
 import io.vertx.core.datagram.DatagramSocket;
 import io.vertx.core.dns.DnsClient;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.metrics.Measured;
@@ -273,13 +274,8 @@ public class Vertx implements Measured {
    * Get the event bus object. There is a single instance of EventBus per Vertx instance.
    * @return the event bus object
    */
-  public io.vertx.loom.core.eventbus.EventBus eventBus() { 
-    if (cached_1 != null) {
-      return cached_1;
-    }
-    io.vertx.loom.core.eventbus.EventBus ret = io.vertx.loom.core.eventbus.EventBus.newInstance((io.vertx.core.eventbus.EventBus)delegate.eventBus());
-    cached_1 = ret;
-    return ret;
+  public EventBus eventBus() { 
+    return delegate.eventBus();
   }
 
   /**
@@ -744,7 +740,6 @@ public class Vertx implements Measured {
   }
 
   private io.vertx.loom.core.file.FileSystem cached_0;
-  private io.vertx.loom.core.eventbus.EventBus cached_1;
   private java.lang.Boolean cached_3;
   public static Vertx newInstance(io.vertx.core.Vertx arg) {
     return arg != null ? new Vertx(arg) : null;

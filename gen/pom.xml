@@ -24,11 +24,6 @@
 		<!-- Test -->
 		<dependency>
 			<groupId>io.vertx</groupId>
-			<artifactId>vertx-web</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.vertx</groupId>
 			<artifactId>vertx-codegen</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
@@ -40,6 +35,7 @@
 		</dependency>
 	</dependencies>
 
+<!-- 
 	<build>
 		<plugins>
 			<plugin>
@@ -54,108 +50,15 @@
 						<configuration>
 							<resources>
 								<resource>
+									<directory>${basedir}/src/main/java</directory>
 									<directory>${basedir}/src/test/java</directory>
-									<directory>${project.build.directory}/sources/java</directory>
 								</resource>
 							</resources>
 						</configuration>
 					</execution>
 				</executions>
 			</plugin>
-
-			<plugin>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.0.2</version>
-				<configuration>
-					<includeGroupIds>io.vertx</includeGroupIds>
-					<includeArtifactIds>
-						vertx-core,
-						vertx-unit,
-						vertx-bridge-common,
-						vertx-mongo-client,
-						vertx-cassandra-client,
-						vertx-jdbc-client,
-						vertx-auth-common,
-						vertx-auth-jdbc,
-						vertx-auth-htdigest,
-						vertx-auth-htpasswd,
-						vertx-auth-jwt,
-						vertx-auth-mongo,
-						vertx-auth-oauth2,
-						vertx-auth-shiro,
-						vertx-auth-webauthn,
-						vertx-auth-properties,
-						vertx-auth-ldap,
-						vertx-auth-sql-client,
-						vertx-auth-otp,
-						vertx-web-common,
-						vertx-web-client,
-						vertx-web,
-						vertx-web-api-contract,
-						vertx-web-openapi,
-						vertx-web-templ-freemarker,
-						vertx-web-templ-handlebars,
-						vertx-web-templ-jade,
-						vertx-web-templ-mvel,
-						vertx-web-templ-pebble,
-						vertx-web-templ-rocker,
-						vertx-web-templ-thymeleaf,
-						vertx-web-sstore-cookie,
-						vertx-web-sstore-redis,
-						vertx-web-sstore-infinispan,
-						vertx-web-graphql,
-						vertx-web-validation,
-						vertx-circuit-breaker,
-						vertx-dropwizard-metrics,
-						vertx-redis-client,
-						vertx-stomp,
-						vertx-mail-client,
-						vertx-consul-client,
-						vertx-amqp-client,
-						vertx-service-discovery,
-						vertx-service-discovery-backend-consul,
-						vertx-service-discovery-backend-redis,
-						vertx-service-discovery-backend-zookeeper,
-						vertx-service-discovery-bridge-consul,
-						vertx-service-discovery-bridge-docker,
-						vertx-service-discovery-bridge-kubernetes,
-						vertx-service-discovery-bridge-zookeeper,
-						vertx-service-discovery-bridge-docker-links,
-						vertx-config,
-						vertx-kafka-client,
-						vertx-mqtt,
-						vertx-pg-client,
-						vertx-sql-client,
-						vertx-mysql-client,
-						vertx-db2-client,
-						vertx-mssql-client,
-						vertx-sql-client-templates,
-						vertx-rabbitmq-client,
-						vertx-health-check,
-						vertx-shell,
-						vertx-micrometer-metrics,
-						vertx-tcp-eventbus-bridge,
-						vertx-json-schema
-					</includeArtifactIds>
-					<classifier>sources</classifier>
-					<includeTypes>jar</includeTypes>
-				</configuration>
-				<executions>
-					<!-- Unpack java sources to target/java-sources -->
-					<execution>
-						<id>unpack-java</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>unpack-dependencies</goal>
-						</goals>
-						<configuration>
-							<includes>io/vertx/**/*.java,examples/**/*.java</includes>
-							<excludes>**/impl/**/*.java,io/vertx/groovy/**,io/vertx/reactivex/**,io/vertx/rxjava/**,examples/override/**</excludes>
-							<outputDirectory>${project.build.directory}/sources/java</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
+	 -->
 </project>

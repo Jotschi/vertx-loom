@@ -18,7 +18,6 @@ import org.junit.rules.TestName;
 import io.vertx.codegen.CodeGenProcessor;
 import io.vertx.codegen.Compiler;
 import io.vertx.ext.web.Route;
-import io.vertx.test.codegen.testapi.VertxGenClass1;
 
 public class LoomGeneratorTest {
 
@@ -60,15 +59,8 @@ public class LoomGeneratorTest {
   }
 
   @Test
-  public void testLoom() throws Exception {
-    assertCompile("loom", VertxGenClass1.class);
-    assertTrue(new File(testDir, "").exists());
-  }
-
-  @Test
   public void testRoute() throws Exception {
     assertCompile("loom", Route.class);
-    assertTrue(new File(testDir, "").exists());
   }
 
 }

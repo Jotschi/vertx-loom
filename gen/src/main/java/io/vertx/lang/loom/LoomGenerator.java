@@ -10,22 +10,22 @@ import static io.vertx.codegen.type.ClassKind.LIST;
 import static io.vertx.codegen.type.ClassKind.MAP;
 import static io.vertx.codegen.type.ClassKind.OBJECT;
 import static io.vertx.codegen.type.ClassKind.SET;
+import static java.util.stream.Collectors.joining;
 
 import java.io.PrintWriter;
-import java.lang.annotation.Annotation;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import io.vertx.codegen.ClassModel;
+import io.vertx.codegen.ConstantInfo;
+import io.vertx.codegen.Helper;
 import io.vertx.codegen.MethodInfo;
 import io.vertx.codegen.TypeParamInfo;
-import io.vertx.codegen.annotations.DataObject;
-import io.vertx.codegen.annotations.ModuleGen;
-import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.codegen.type.ClassKind;
+import io.vertx.codegen.type.ClassTypeInfo;
 import io.vertx.codegen.type.ParameterizedTypeInfo;
 import io.vertx.codegen.type.TypeInfo;
 import io.vertx.codegen.type.TypeVariableInfo;
@@ -35,13 +35,8 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
 
   LoomGenerator() {
     super("loom");
-    this.name = "loom";
     this.kinds = Collections.singleton("class");
-  }
-
-  @Override
-  public Collection<Class<? extends Annotation>> annotations() {
-    return Arrays.asList(DataObject.class, ModuleGen.class, VertxGen.class);
+    this.name = "Loom";
   }
 
   @Override
@@ -58,7 +53,7 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
   @Override
   public String render(ClassModel model, int index, int size, Map<String, Object> session) {
     String output = super.render(model, index, size, session);
-    System.out.println(output);
+//    System.out.println(output);
     return output;
   }
 
@@ -67,7 +62,8 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
       PrintWriter writer) {
     genSimpleMethod("public", model, method, cacheDecls, genBody, writer);
   }
-  
+
+  @Override
   protected String genConvParam(TypeInfo type, MethodInfo method, String expr) {
     ClassKind kind = type.getKind();
     if (isSameType(type, method)) {
@@ -94,20 +90,20 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
           String resultName = genTypeName(resultType);
           return "new Handler<AsyncResult<" + resultName + ">>() {\n" +
             "      public void handle(AsyncResult<" + resultName + "> ar) {\n" +
-            "        Async.async(() -> {\n" +
+            "        io.vertx.loom.core.Async.async(() -> {\n" +
             "          if (ar.succeeded()) {\n" +
             "            " + expr + ".handle(io.vertx.core.Future.succeededFuture(" + genConvReturn(resultType, method, "ar.result()") + "));\n" +
             "          } else {\n" +
             "            " + expr + ".handle(io.vertx.core.Future.failedFuture(ar.cause()));\n" +
             "          }\n" +
-            "        })\n" +
+            "        });\n" +
             "      }\n" +
             "    }";
         } else {
           String eventName = genTypeName(eventType);
           return "new Handler<" + eventName + ">() {\n" +
             "      public void handle(" + eventName + " event) {\n" +
-            "        Async.async(() -> {\n" +
+            "        io.vertx.loom.core.Async.async(() -> {\n" +
             "          " + expr + ".handle(" + genConvReturn(eventType, method, "event") + ");\n" +
             "        });\n" +
             "      }\n" +
@@ -135,5 +131,137 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
     }
     return expr;
   }
-  
+
+  @Override
+  protected void generateClassBody(ClassModel model, String constructor, PrintWriter writer) {
+    ClassTypeInfo type = model.getType();
+    String simpleName = type.getSimpleName();
+    if (model.isConcrete()) {
+      writer.print("  public static final TypeArg<");
+      writer.print(simpleName);
+      writer.print("> __TYPE_ARG = new TypeArg<>(");
+      writer.print("    obj -> new ");
+      writer.print(simpleName);
+      writer.print("((");
+      writer.print(type.getName());
+      writer.println(") obj),");
+      writer.print("    ");
+      writer.print(simpleName);
+      writer.println("::getDelegate");
+      writer.println("  );");
+      writer.println();
+    }
+    writer.print("  private final ");
+    writer.print(Helper.getNonGenericType(model.getIfaceFQCN()));
+    List<TypeParamInfo.Class> typeParams = model.getTypeParams();
+    if (typeParams.size() > 0) {
+      writer.print(typeParams.stream().map(TypeParamInfo.Class::getName).collect(joining(",", "<", ">")));
+    }
+    writer.println(" delegate;");
+
+    for (TypeParamInfo.Class typeParam : typeParams) {
+      writer.print("  public final TypeArg<");
+      writer.print(typeParam.getName());
+      writer.print("> __typeArg_");
+      writer.print(typeParam.getIndex());
+      writer.println(";");
+    }
+    writer.println("  ");
+
+    writer.print("  public ");
+    writer.print(constructor);
+    writer.print("(");
+    writer.print(Helper.getNonGenericType(model.getIfaceFQCN()));
+    writer.println(" delegate) {");
+
+    if (model.isConcrete() && model.getConcreteSuperType() != null) {
+      writer.println("    super(delegate);");
+    }
+    writer.println("    this.delegate = delegate;");
+    for (TypeParamInfo.Class typeParam : typeParams) {
+      writer.print("    this.__typeArg_");
+      writer.print(typeParam.getIndex());
+      writer.print(" = TypeArg.unknown();");
+    }
+    writer.println("  }");
+    writer.println();
+
+    // Object constructor
+    writer.print("  public ");
+    writer.print(constructor);
+    writer.print("(Object delegate");
+    for (TypeParamInfo.Class typeParam : typeParams) {
+      writer.print(", TypeArg<");
+      writer.print(typeParam.getName());
+      writer.print("> typeArg_");
+      writer.print(typeParam.getIndex());
+    }
+    writer.println(") {");
+    if (model.isConcrete() && model.getConcreteSuperType() != null) {
+      // This is incorrect it will not pass the generic type in some case
+      // we haven't yet ran into that bug
+      writer.print("    super((");
+      writer.print(Helper.getNonGenericType(model.getIfaceFQCN()));
+      writer.println(")delegate);");
+    }
+    writer.print("    this.delegate = (");
+    writer.print(Helper.getNonGenericType(model.getIfaceFQCN()));
+    writer.println(")delegate;");
+    for (TypeParamInfo.Class typeParam : typeParams) {
+      writer.print("    this.__typeArg_");
+      writer.print(typeParam.getIndex());
+      writer.print(" = typeArg_");
+      writer.print(typeParam.getIndex());
+      writer.println(";");
+    }
+    writer.println("  }");
+    writer.println();
+
+    writer.print("  public ");
+    writer.print(type.getName());
+    writer.println(" getDelegate() {");
+    writer.println("    return delegate;");
+    writer.println("  }");
+    writer.println();
+
+    List<MethodInfo> methods = new ArrayList<>();
+    methods.addAll(model.getMethods());
+    methods.addAll(model.getAnyJavaTypeMethods());
+    int count = 0;
+    for (MethodInfo method : methods) {
+      TypeInfo returnType = method.getReturnType();
+      if (returnType instanceof ParameterizedTypeInfo) {
+        ParameterizedTypeInfo parameterizedType = (ParameterizedTypeInfo)returnType;
+        List<TypeInfo> typeArgs = parameterizedType.getArgs();
+        Map<TypeInfo, String> typeArgMap = new HashMap<>();
+        for (TypeInfo typeArg : typeArgs) {
+          if (typeArg.getKind() == API && !containsTypeVariableArgument(typeArg)) {
+            String typeArgRef = "TYPE_ARG_" + count++;
+            typeArgMap.put(typeArg, typeArgRef);
+            genTypeArgDecl(typeArg, method, typeArgRef, writer);
+          }
+        }
+        methodTypeArgMap.put(method, typeArgMap);
+      }
+    }
+    // Cosmetic space
+    if (methodTypeArgMap.size() > 0) {
+      writer.println();
+    }
+
+    List<String> cacheDecls = new ArrayList<>();
+    for (MethodInfo method : methods) {
+      genMethods(model, method, cacheDecls, true, writer);
+    }
+
+    for (ConstantInfo constant : model.getConstants()) {
+      genConstant(model, constant, writer);
+    }
+
+    for (String cacheDecl : cacheDecls) {
+      writer.print("  ");
+      writer.print(cacheDecl);
+      writer.println(";");
+    }
+  }  
 }

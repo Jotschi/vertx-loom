@@ -21,6 +21,14 @@
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>io.vertx</groupId>
+				<artifactId>vertx-dependencies</artifactId>
+				<version>${vertx.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+
 			<!-- Project modules -->
 			<dependency>
 				<groupId>de.jotschi.vertx.loom</groupId>
