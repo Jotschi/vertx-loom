@@ -1,328 +1,139 @@
 package io.vertx.lang.loom;
 
-import static io.vertx.codegen.type.ClassKind.VOID;
+import static io.vertx.codegen.type.ClassKind.API;
+import static io.vertx.codegen.type.ClassKind.ASYNC_RESULT;
+import static io.vertx.codegen.type.ClassKind.CLASS_TYPE;
+import static io.vertx.codegen.type.ClassKind.FUNCTION;
+import static io.vertx.codegen.type.ClassKind.FUTURE;
+import static io.vertx.codegen.type.ClassKind.HANDLER;
+import static io.vertx.codegen.type.ClassKind.LIST;
+import static io.vertx.codegen.type.ClassKind.MAP;
+import static io.vertx.codegen.type.ClassKind.OBJECT;
+import static io.vertx.codegen.type.ClassKind.SET;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import io.vertx.codegen.ClassModel;
 import io.vertx.codegen.MethodInfo;
-import io.vertx.codegen.MethodKind;
-import io.vertx.codegen.ParamInfo;
 import io.vertx.codegen.TypeParamInfo;
+import io.vertx.codegen.annotations.DataObject;
+import io.vertx.codegen.annotations.ModuleGen;
+import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.codegen.type.ClassKind;
-import io.vertx.codegen.type.ClassTypeInfo;
 import io.vertx.codegen.type.ParameterizedTypeInfo;
 import io.vertx.codegen.type.TypeInfo;
-import io.vertx.lang.rx.AbstractRxGenerator;
+import io.vertx.codegen.type.TypeVariableInfo;
+import io.vertx.lang.rx.AbstractBaseVertxGenerator;
 
-class LoomGenerator extends AbstractRxGenerator {
+class LoomGenerator extends AbstractBaseVertxGenerator {
+
   LoomGenerator() {
-    super("rxjava3");
+    super("loom");
+    this.name = "loom";
     this.kinds = Collections.singleton("class");
-    this.name = "RxJava3";
+  }
+
+  @Override
+  public Collection<Class<? extends Annotation>> annotations() {
+    return Arrays.asList(DataObject.class, ModuleGen.class, VertxGen.class);
+  }
+
+  @Override
+  protected void genReadStream(List<? extends TypeParamInfo> typeParams, PrintWriter writer) {
+    // TODO Auto-generated method stub
   }
 
   @Override
   protected void genImports(ClassModel model, PrintWriter writer) {
-    writer.println("import io.vertx.rxjava3.RxHelper;");
-    writer.println("import io.vertx.rxjava3.ObservableHelper;");
-    writer.println("import io.vertx.rxjava3.FlowableHelper;");
-    writer.println("import io.vertx.rxjava3.impl.AsyncResultMaybe;");
-    writer.println("import io.vertx.rxjava3.impl.AsyncResultSingle;");
-    writer.println("import io.vertx.rxjava3.impl.AsyncResultCompletable;");
-    writer.println("import io.vertx.rxjava3.WriteStreamObserver;");
-    writer.println("import io.vertx.rxjava3.WriteStreamSubscriber;");
     super.genImports(model, writer);
+    writer.println("import io.vertx.loom.core.Async;");
+  }
+  
+  @Override
+  public String render(ClassModel model, int index, int size, Map<String, Object> session) {
+    String output = super.render(model, index, size, session);
+    System.out.println(output);
+    return output;
   }
 
   @Override
-  protected void genToObservable(TypeInfo streamType, PrintWriter writer) {
-    writer.print("  private io.reactivex.rxjava3.core.Observable<");
-    writer.print(genTranslatedTypeName(streamType));
-    writer.println("> observable;");
-
-    writer.print("  private io.reactivex.rxjava3.core.Flowable<");
-    writer.print(genTranslatedTypeName(streamType));
-    writer.println("> flowable;");
-
-    writer.println();
-
-    genToXXXAble(streamType, "Observable", "observable", writer);
-    genToXXXAble(streamType, "Flowable", "flowable", writer);
+  protected void genMethods(ClassModel model, MethodInfo method, List<String> cacheDecls, boolean genBody,
+      PrintWriter writer) {
+    genSimpleMethod("public", model, method, cacheDecls, genBody, writer);
   }
-
-  private void genToXXXAble(TypeInfo streamType, String rxType, String rxName, PrintWriter writer) {
-    writer.print("  public synchronized ");
-    writer.print("io.reactivex.rxjava3.core.");
-    writer.print(rxType);
-    writer.print("<");
-    writer.print(genTranslatedTypeName(streamType));
-    writer.print("> to");
-    writer.print(rxType);
-    writer.println("() {");
-
-    writer.print("    ");
-    writer.print("if (");
-    writer.print(rxName);
-    writer.println(" == null) {");
-
-    if (streamType.getKind() == ClassKind.API) {
-      writer.print("      Function<");
-      writer.print(streamType.getName());
-      writer.print(", ");
-      writer.print(genTranslatedTypeName(streamType));
-      writer.print("> conv = ");
-      writer.print(genTranslatedTypeName(streamType.getRaw()));
-      writer.println("::newInstance;");
-
-      writer.print("      ");
-      writer.print(rxName);
-      writer.print(" = ");
-      writer.print(rxType);
-      writer.print("Helper.to");
-      writer.print(rxType);
-      writer.println("(delegate, conv);");
-    } else if (streamType.isVariable()) {
-      String typeVar = streamType.getSimpleName();
-      writer.print("      Function<");
-      writer.print(typeVar);
-      writer.print(", ");
-      writer.print(typeVar);
-      writer.print("> conv = (Function<");
-      writer.print(typeVar);
-      writer.print(", ");
-      writer.print(typeVar);
-      writer.println(">) __typeArg_0.wrap;");
-
-      writer.print("      ");
-      writer.print(rxName);
-      writer.print(" = ");
-      writer.print(rxType);
-      writer.print("Helper.to");
-      writer.print(rxType);
-      writer.println("(delegate, conv);");
-    } else {
-      writer.print("      ");
-      writer.print(rxName);
-      writer.print(" = ");
-      writer.print(rxType);
-      writer.print("Helper.to");
-      writer.print(rxType);
-      writer.println("(this.getDelegate());");
-    }
-
-    writer.println("    }");
-    writer.print("    return ");
-    writer.print(rxName);
-    writer.println(";");
-    writer.println("  }");
-    writer.println();
-  }
-
-  @Override
-  protected void genToSubscriber(TypeInfo streamType, PrintWriter writer) {
-    writer.format("  private WriteStreamObserver<%s> observer;%n", genTranslatedTypeName(streamType));
-    writer.format("  private WriteStreamSubscriber<%s> subscriber;%n", genTranslatedTypeName(streamType));
-    writer.println();
-    genToXXXEr(streamType, "Observer", "observer", writer);
-    genToXXXEr(streamType, "Subscriber", "subscriber", writer);
-  }
-
-  private void genToXXXEr(TypeInfo streamType, String rxType, String rxName, PrintWriter writer) {
-    writer.format("  public synchronized WriteStream%s<%s> to%s() {%n", rxType, genTranslatedTypeName(streamType), rxType);
-    writer.format("    if (%s == null) {%n", rxName);
-    if (streamType.getKind() == ClassKind.API) {
-      writer.format("      Function<%s, %s> conv = %s::getDelegate;%n", genTranslatedTypeName(streamType.getRaw()), streamType.getName(), genTranslatedTypeName(streamType));
-      writer.format("      %s = RxHelper.to%s(getDelegate(), conv);%n", rxName, rxType);
-    } else if (streamType.isVariable()) {
-      String typeVar = streamType.getSimpleName();
-      writer.format("      Function<%s, %s> conv = (Function<%s, %s>) __typeArg_0.unwrap;%n", typeVar, typeVar, typeVar, typeVar);
-      writer.format("      %s = RxHelper.to%s(getDelegate(), conv);%n", rxName, rxType);
-    } else {
-      writer.format("      %s = RxHelper.to%s(getDelegate());%n", rxName, rxType);
-    }
-    writer.println("    }");
-    writer.format("    return %s;%n", rxName);
-    writer.println("  }");
-    writer.println();
-  }
-
-  @Override
-  protected void genMethods(ClassModel model, MethodInfo method, List<String> cacheDecls, boolean genBody, PrintWriter writer) {
-    if (method.getKind() == MethodKind.CALLBACK || method.getKind() == MethodKind.FUTURE) {
-      genRxMethod(model, method, genBody, writer);
-      genLazyRxMethod(model, method, genBody, writer);
-    } else {
-      genSimpleMethod("public", model, method, cacheDecls, genBody, writer);
-    }
-  }
-
-  private void genRxMethod(ClassModel model, MethodInfo method, boolean genBody, PrintWriter writer) {
-    MethodInfo futMethod = genFutureMethod(method);
-    startMethodTemplate("public", model.getType(), futMethod, "", writer);
-    if (genBody) {
-      String rxName = genFutureMethodName(method);
-      writer.println(" { ");
-      writer.print("    ");
-      writer.print(genReturnTypeDecl(futMethod.getReturnType()));
-      writer.print(" ret = ");
-      writer.print(rxName);
-      writer.print("(");
-      List<ParamInfo> params = futMethod.getParams();
-      writer.print(params.stream().map(ParamInfo::getName).collect(Collectors.joining(", ")));
-      writer.println(");");
-      writer.println("    ret = ret.cache();");
-      writer.print("    ret.subscribe(io.vertx.rxjava3.");
-      writer.print(futMethod.getReturnType().getRaw().getSimpleName());
-      writer.println("Helper.nullObserver());");
-      writer.println("    return ret;");
-      writer.println("  }");
-    } else {
-      writer.println(";");
-    }
-    writer.println();
-  }
-
-  private void genLazyRxMethod(ClassModel model, MethodInfo method, boolean genBody, PrintWriter writer) {
-    MethodInfo futMethod = genFutureMethod(method);
-    futMethod.setName(genFutureMethodName(futMethod));
-    ClassTypeInfo raw = futMethod.getReturnType().getRaw();
-    String methodSimpleName = raw.getSimpleName();
-    String adapterType = "AsyncResult" + methodSimpleName + ".to" + methodSimpleName;
-    startMethodTemplate("public", model.getType(), futMethod, "", writer);
-    if (genBody) {
-      writer.println(" { ");
-      if (method.getKind() == MethodKind.FUTURE) {
-        writer.print("    return ");
-        writer.print(adapterType);
-        writer.print("(");
-        writer.print(genInvokeDelegate(model, method));
-        if (!futMethod.getReturnType().getSimpleName().equals("Completable")) {
-          writer.print(", __value -> ");
-          TypeInfo asyncType = ((ParameterizedTypeInfo) method.getReturnType()).getArg(0);
-          writer.print(genConvReturn(asyncType, method, "__value"));
-        }
-        writer.println(");");
-      } else {
-        writer.print("    return ");
-        writer.print(adapterType);
-        writer.print("( ");
-        writer.print(method.getParam(futMethod.getParams().size()).getName());
-        writer.println(" -> {");
-        writer.print("      ");
-        writer.print(genInvokeDelegate(model, method));
-        writer.println(";");
-        writer.println("    });");
-      }
-      writer.println("  }");
-    } else {
-      writer.println(";");
-    }
-    writer.println();
-  }
-
-  protected void genReadStream(List<? extends TypeParamInfo> typeParams, PrintWriter writer){
-    writer.print("  io.reactivex.rxjava3.core.Observable<");
-    writer.print(typeParams.get(0).getName());
-    writer.println("> toObservable();");
-    writer.println();
-    writer.print("  io.reactivex.rxjava3.core.Flowable<");
-    writer.print(typeParams.get(0).getName());
-    writer.println("> toFlowable();");
-    writer.println();
-  }
-
-  private TypeInfo rewriteParamType(TypeInfo type) {
-	  return type;
-	  /*
-    if (type.isParameterized()) {
-      if (type.getRaw().getName().equals("io.vertx.core.streams.ReadStream")) {
-        return new io.vertx.codegen.type.ParameterizedTypeInfo(
-          io.vertx.codegen.type.TypeReflectionFactory.create(Flowable.class).getRaw(),
-          false,
-          java.util.Collections.singletonList(((ParameterizedTypeInfo) type).getArg(0))
-        );
-      } else if (type.getKind() == ClassKind.FUTURE) {
-        TypeInfo futType = ((ParameterizedTypeInfo) type).getArg(0);
-        if (futType.getKind() == VOID) {
-          return io.vertx.codegen.type.TypeReflectionFactory.create(io.reactivex.rxjava3.core.Completable.class);
-        } else if (futType.isNullable()) {
-          return new io.vertx.codegen.type.ParameterizedTypeInfo(io.vertx.codegen.type.TypeReflectionFactory.create(io.reactivex.rxjava3.core.Maybe.class).getRaw(), false, Collections.singletonList(futType));
-        } else {
-          return new io.vertx.codegen.type.ParameterizedTypeInfo(io.vertx.codegen.type.TypeReflectionFactory.create(io.reactivex.rxjava3.core.Single.class).getRaw(), false, Collections.singletonList(futType));
-        }
-      } else if (type.getKind() == ClassKind.FUNCTION) {
-        ParameterizedTypeInfo functionType = (ParameterizedTypeInfo) type;
-        TypeInfo argType = functionType.getArg(0); // Return not param
-        TypeInfo retType = rewriteParamType(functionType.getArg(1));
-        if (argType != functionType.getArg(0) || retType != functionType.getArg(1)) {
-          return new ParameterizedTypeInfo(
-            functionType.getRaw(),
-            functionType.isNullable(),
-            Arrays.asList(argType, retType));
-        }
-      }
-    }
-    return type;
-    */
-  }
-
-  @Override
-  protected String genParamTypeDecl(TypeInfo type) {
-    return super.genParamTypeDecl(rewriteParamType(type));
-  }
-
-  @Override
+  
   protected String genConvParam(TypeInfo type, MethodInfo method, String expr) {
-    if (type.isParameterized()) {
-      if (type.getRaw().getName().equals("io.vertx.core.streams.ReadStream")) {
-        ParameterizedTypeInfo parameterizedType = (ParameterizedTypeInfo) type;
-        String adapterFunction = "obj -> " + genConvParam(parameterizedType.getArg(0), method, "obj");
-        return "io.vertx.rxjava3.impl.ReadStreamSubscriber.asReadStream(" + expr + ", " + adapterFunction + ").resume()";
-      } else if (type.getKind() == ClassKind.FUTURE) {
-        TypeInfo futType = ((ParameterizedTypeInfo) type).getArg(0);
-        if (futType.getKind() == VOID) {
-          return "io.vertx.rxjava3.CompletableHelper.toFuture(" + expr + ")";
-        } else if (futType.isNullable()) {
-          ParameterizedTypeInfo parameterizedType = (ParameterizedTypeInfo) type;
-          String adapterFunction = "obj -> " + genConvParam(parameterizedType.getArg(0), method, "obj");
-          return "io.vertx.rxjava3.MaybeHelper.toFuture(" + expr + ", " + adapterFunction + ")";
-        } else {
-          ParameterizedTypeInfo parameterizedType = (ParameterizedTypeInfo) type;
-          String adapterFunction = "obj -> " + genConvParam(parameterizedType.getArg(0), method, "obj");
-          return "io.vertx.rxjava3.SingleHelper.toFuture(" + expr + ", " + adapterFunction + ")";
+    ClassKind kind = type.getKind();
+    if (isSameType(type, method)) {
+      return expr;
+    } else if (kind == OBJECT) {
+      if (type.isVariable()) {
+        String typeArg = genTypeArg((TypeVariableInfo) type, method);
+        if (typeArg != null) {
+          return typeArg + ".<" + type.getName() + ">unwrap(" + expr + ")";
         }
       }
-    }
-    return super.genConvParam(type, method, expr);
-  }
-
-  private MethodInfo genFutureMethod(MethodInfo method) {
-    List<ParamInfo> futParams;
-    TypeInfo futType;
-    TypeInfo futUnresolvedType;
-    if (method.getKind() == MethodKind.FUTURE) {
-      futParams = new ArrayList<>(method.getParams());
-      futType = ((ParameterizedTypeInfo) method.getReturnType()).getArg(0);
-      futUnresolvedType = futType;
-    } else {
-      futParams = new ArrayList<>();
-      int count = 0;
-      int size = method.getParams().size() - 1;
-      while (count < size) {
-        ParamInfo param = method.getParam(count);
-        /* Transform ReadStream -> Flowable */
-        futParams.add(param);
-        count = count + 1;
+      return expr;
+    } else if (kind == API) {
+      return expr + ".getDelegate()";
+    } else if (kind == CLASS_TYPE) {
+      return "io.vertx.lang." + id() + ".Helper.unwrap(" + expr + ")";
+    } else if (type.isParameterized()) {
+      ParameterizedTypeInfo parameterizedTypeInfo = (ParameterizedTypeInfo) type;
+      if (kind == HANDLER) {
+        TypeInfo eventType = parameterizedTypeInfo.getArg(0);
+        ClassKind eventKind = eventType.getKind();
+        if (eventKind == ASYNC_RESULT) {
+          TypeInfo resultType = ((ParameterizedTypeInfo) eventType).getArg(0);
+          String resultName = genTypeName(resultType);
+          return "new Handler<AsyncResult<" + resultName + ">>() {\n" +
+            "      public void handle(AsyncResult<" + resultName + "> ar) {\n" +
+            "        Async.async(() -> {\n" +
+            "          if (ar.succeeded()) {\n" +
+            "            " + expr + ".handle(io.vertx.core.Future.succeededFuture(" + genConvReturn(resultType, method, "ar.result()") + "));\n" +
+            "          } else {\n" +
+            "            " + expr + ".handle(io.vertx.core.Future.failedFuture(ar.cause()));\n" +
+            "          }\n" +
+            "        })\n" +
+            "      }\n" +
+            "    }";
+        } else {
+          String eventName = genTypeName(eventType);
+          return "new Handler<" + eventName + ">() {\n" +
+            "      public void handle(" + eventName + " event) {\n" +
+            "        Async.async(() -> {\n" +
+            "          " + expr + ".handle(" + genConvReturn(eventType, method, "event") + ");\n" +
+            "        });\n" +
+            "      }\n" +
+            "    }";
+        }
+      } else if (kind == FUNCTION) {
+        TypeInfo argType = parameterizedTypeInfo.getArg(0);
+        TypeInfo retType = parameterizedTypeInfo.getArg(1);
+        String argName = genTypeName(argType);
+        String retName = genTypeName(retType);
+        return "new Function<" + argName + "," + retName + ">() {\n" +
+          "      public " + retName + " apply(" + argName + " arg) {\n" +
+          "        " + genParamTypeDecl(retType) + " ret = " + expr + ".apply(" + genConvReturn(argType, method, "arg") + ");\n" +
+          "        return " + genConvParam(retType, method, "ret") + ";\n" +
+          "      }\n" +
+          "    }";
+      } else if (kind == LIST || kind == SET) {
+        return expr + ".stream().map(elt -> " + genConvParam(parameterizedTypeInfo.getArg(0), method, "elt") + ").collect(Collectors.to" + type.getRaw().getSimpleName() + "())";
+      } else if (kind == MAP) {
+        return expr + ".entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> " + genConvParam(parameterizedTypeInfo.getArg(1), method, "e.getValue()") + "))";
+      } else if (kind == FUTURE) {
+        ParameterizedTypeInfo futureType = (ParameterizedTypeInfo) type;
+        return expr + ".map(val -> " + genConvParam(futureType.getArg(0), method, "val") + ")";
       }
-      ParamInfo futParam = method.getParam(size);
-      futType = ((ParameterizedTypeInfo) ((ParameterizedTypeInfo) futParam.getType()).getArg(0)).getArg(0);
-      futUnresolvedType = ((ParameterizedTypeInfo) ((ParameterizedTypeInfo) futParam.getUnresolvedType()).getArg(0)).getArg(0);
     }
-    return method.copy().setReturnType(futUnresolvedType).setParams(futParams);
+    return expr;
   }
+  
 }

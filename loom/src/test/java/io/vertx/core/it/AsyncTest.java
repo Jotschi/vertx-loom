@@ -6,7 +6,7 @@ import io.vertx.core.Vertx;
 import io.vertx.loom.core.Async;
 import io.vertx.test.core.AsyncTestBase;
 
-public class LoomHelperTest extends AsyncTestBase {
+public class AsyncTest extends AsyncTestBase {
 
 	@Test
 	public void testExecuteErrorHandling() {
