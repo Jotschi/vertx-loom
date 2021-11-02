@@ -19,6 +19,7 @@ public class LoomRouterTest extends AsyncTestBase {
 			assertNotNull("The context should not be null",Vertx.currentContext());
 			rc.end(Thread.currentThread().getName());
 		});
+
 		vertx.createHttpServer().requestHandler(router).listen(8080, "localhost", onSuccess(s -> {
 			HttpClient client = vertx.createHttpClient();
 			client.request(HttpMethod.GET, 8080, "localhost", "/test", onSuccess(req -> {

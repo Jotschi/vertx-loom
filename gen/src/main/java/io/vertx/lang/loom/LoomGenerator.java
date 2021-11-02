@@ -35,6 +35,8 @@ import io.vertx.codegen.type.ParameterizedTypeInfo;
 import io.vertx.codegen.type.TypeInfo;
 import io.vertx.codegen.type.TypeVariableInfo;
 import io.vertx.core.Vertx;
+import io.vertx.ext.web.Route;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.lang.rx.AbstractBaseVertxGenerator;
 
 class LoomGenerator extends AbstractBaseVertxGenerator {
@@ -59,13 +61,13 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
   @Override
   public String render(ClassModel model, int index, int size, Map<String, Object> session) {
     String output = super.render(model, index, size, session);
-//    System.out.println(output);
+    // System.out.println(output);
     return output;
   }
 
   @Override
   protected void genMethods(ClassModel model, MethodInfo method, List<String> cacheDecls, boolean genBody,
-      PrintWriter writer) {
+    PrintWriter writer) {
     genSimpleMethod("public", model, method, cacheDecls, genBody, writer);
 
     if (method.getKind() == MethodKind.CALLBACK) {
@@ -73,7 +75,7 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
       MethodInfo copy = method.copy();
       copy.getParams().remove(copy.getParams().size() - 1);
       Optional<MethodInfo> any = Stream.concat(model.getMethods().stream(), model.getAnyJavaTypeMethods().stream())
-          .filter(m -> compareMethods(m, copy)).findAny();
+        .filter(m -> compareMethods(m, copy)).findAny();
       if (!any.isPresent()) {
         startMethodTemplate("public", model.getType(), copy, "", writer);
         if (genBody) {
@@ -103,7 +105,7 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
   protected String genInvokeDelegate(ClassModel model, MethodInfo method) {
     // Delegate to AsyncLoom for static calls to Vertx#currentContext
     if (Vertx.class.getName().equals(model.getFqn()) && method.isStaticMethod()
-        && method.getName().equals("currentContext")) {
+      && method.getName().equals("currentContext")) {
       return "io.vertx.lang.loom.LoomAsync.currentVertxContext()";
     } else {
       return super.genInvokeDelegate(model, method);
@@ -111,7 +113,7 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
   }
 
   @Override
-  protected String genConvParam(TypeInfo type, MethodInfo method, String expr) {
+  protected String genConvParam(ClassModel model, TypeInfo type, MethodInfo method, String expr) {
     ClassKind kind = type.getKind();
     if (isSameType(type, method)) {
       return expr;
@@ -130,45 +132,97 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
     } else if (type.isParameterized()) {
       ParameterizedTypeInfo parameterizedTypeInfo = (ParameterizedTypeInfo) type;
       if (kind == HANDLER) {
+        boolean applyLoom = checkForLoomSupport(model);
         TypeInfo eventType = parameterizedTypeInfo.getArg(0);
         ClassKind eventKind = eventType.getKind();
         if (eventKind == ASYNC_RESULT) {
           TypeInfo resultType = ((ParameterizedTypeInfo) eventType).getArg(0);
           String resultName = genTypeName(resultType);
-          return "new Handler<AsyncResult<" + resultName + ">>() {\n" + "      public void handle(AsyncResult<"
-              + resultName + "> ar) {\n" + "        io.vertx.lang.loom.LoomAsync.async(() -> {\n"
-              + "          if (ar.succeeded()) {\n" + "            " + expr
-              + ".handle(io.vertx.core.Future.succeededFuture(" + genConvReturn(resultType, method, "ar.result()")
-              + "));\n" + "          } else {\n" + "            " + expr
-              + ".handle(io.vertx.core.Future.failedFuture(ar.cause()));\n" + "          }\n" + "        });\n"
-              + "      }\n" + "    }";
+          if (applyLoom) {
+            return "new Handler<AsyncResult<" + resultName + ">>() {\n"
+              + "      public void handle(AsyncResult<" + resultName + "> ar) {\n"
+              + "        io.vertx.lang.loom.LoomAsync.async(() -> {\n"
+              + "          if (ar.succeeded()) {\n"
+              + "            " + expr + ".handle(io.vertx.core.Future.succeededFuture(" + genConvReturn(model, resultType, method, "ar.result()") + "));\n"
+              + "          } else {\n"
+              + "            " + expr + ".handle(io.vertx.core.Future.failedFuture(ar.cause()));\n"
+              + "          }\n"
+              + "        });\n"
+              + "      }\n"
+              + "    }";
+          } else {
+            return "new Handler<AsyncResult<" + resultName + ">>() {\n"
+              + "      public void handle(AsyncResult<" + resultName + "> ar) {\n"
+              + "        if (ar.succeeded()) {\n"
+              + "          " + expr + ".handle(io.vertx.core.Future.succeededFuture(" + genConvReturn(model, resultType, method, "ar.result()") + "));\n"
+              + "        } else {\n"
+              + "          " + expr + ".handle(io.vertx.core.Future.failedFuture(ar.cause()));\n"
+              + "        }\n"
+              + "      }\n"
+              + "    }";
+          }
         } else {
           String eventName = genTypeName(eventType);
-          return "new Handler<" + eventName + ">() {\n" + "      public void handle(" + eventName + " event) {\n"
-              + "        io.vertx.lang.loom.LoomAsync.async(() -> {\n" + "          " + expr + ".handle("
-              + genConvReturn(eventType, method, "event") + ");\n" + "        });\n" + "      }\n" + "    }";
+          if (applyLoom) {
+            return "new Handler<" + eventName + ">() {\n"
+              + "      public void handle(" + eventName + " event) {\n"
+              + "        io.vertx.lang.loom.LoomAsync.async(() -> {\n"
+              + "          " + expr + ".handle(" + genConvReturn(model, eventType, method, "event") + ");\n"
+              + "        });\n"
+              + "      }\n"
+              + "    }";
+          } else {
+            return "new Handler<" + eventName + ">() {\n"
+              + "      public void handle(" + eventName + " event) {\n"
+              + "        " + expr + ".handle(" + genConvReturn(model, eventType, method, "event") + ");\n"
+              + "      }\n"
+              + "    }";
+          }
         }
       } else if (kind == FUNCTION) {
         TypeInfo argType = parameterizedTypeInfo.getArg(0);
         TypeInfo retType = parameterizedTypeInfo.getArg(1);
         String argName = genTypeName(argType);
         String retName = genTypeName(retType);
-        return "new Function<" + argName + "," + retName + ">() {\n" + "      public " + retName + " apply(" + argName
-            + " arg) {\n" + "        " + genParamTypeDecl(retType) + " ret = " + expr + ".apply("
-            + genConvReturn(argType, method, "arg") + ");\n" + "        return " + genConvParam(retType, method, "ret")
-            + ";\n" + "      }\n" + "    }";
+        return "new Function<" + argName + "," + retName + ">() {\n"
+          + "      public " + retName + " apply(" + argName + " arg) {\n"
+          + "        " + genParamTypeDecl(retType) + " ret = " + expr + ".apply(" + genConvReturn(model, argType, method, "arg")
+          + ");\n"
+          + "        return "
+          + genConvParam(model, retType, method, "ret") + ";\n"
+          + "      }\n"
+          + "    }";
       } else if (kind == LIST || kind == SET) {
-        return expr + ".stream().map(elt -> " + genConvParam(parameterizedTypeInfo.getArg(0), method, "elt")
-            + ").collect(Collectors.to" + type.getRaw().getSimpleName() + "())";
+        return expr + ".stream().map(elt -> " + genConvParam(model, parameterizedTypeInfo.getArg(0), method, "elt")
+          + ").collect(Collectors.to" + type.getRaw().getSimpleName() + "())";
       } else if (kind == MAP) {
         return expr + ".entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> "
-            + genConvParam(parameterizedTypeInfo.getArg(1), method, "e.getValue()") + "))";
+          + genConvParam(model, parameterizedTypeInfo.getArg(1), method, "e.getValue()") + "))";
       } else if (kind == FUTURE) {
         ParameterizedTypeInfo futureType = (ParameterizedTypeInfo) type;
-        return expr + ".map(val -> " + genConvParam(futureType.getArg(0), method, "val") + ")";
+        return expr + ".map(val -> " + genConvParam(model, futureType.getArg(0), method, "val") + ")";
       }
     }
     return expr;
+  }
+
+  /**
+   * Check whether loom support should be added for the given model.
+   * 
+   * @param model
+   * @return
+   */
+  private boolean checkForLoomSupport(ClassModel model) {
+    if (model.getFqn().equals(Vertx.class.getName())) {
+      return true;
+    }
+    if (model.getFqn().equals(Route.class.getName())) {
+      return true;
+    }
+    if (model.getFqn().equals(RoutingContext.class.getName())) {
+      return true;
+    }
+    return false;
   }
 
   @Override
@@ -305,8 +359,7 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
   }
 
   /**
-   * Checks whether method name and cardinality of the method parameters is the
-   * same.
+   * Checks whether method name and cardinality of the method parameters is the same.
    * 
    * @param m1
    * @param m2
