@@ -1,4 +1,4 @@
-package io.vertx.loom.core;
+package io.vertx.lang.loom;
 
 import java.util.Objects;
 import java.util.concurrent.Callable;
@@ -13,7 +13,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.loom.rxjava3.LoomContextScheduler;
 
-public final class Async {
+public final class LoomAsync {
 
 	private static final ThreadLocal<AsyncContext> ASYNC_CONTEXT = new ThreadLocal<>();
 	private static final ThreadLocal<Coroutine> AWAIT_CONTEXT = new ThreadLocal<>();
@@ -21,7 +21,7 @@ public final class Async {
 	private record AsyncContext(Context vertxContext, ThreadFactory vThreadFactory) {
 	}
 
-	private Async() {
+	private LoomAsync() {
 
 	}
 

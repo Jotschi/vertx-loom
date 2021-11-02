@@ -1,4 +1,4 @@
-package io.vertx.loom.core;
+package io.vertx.lang.loom;
 
 import io.reactivex.rxjava3.core.Single;
 import io.vertx.core.Context;

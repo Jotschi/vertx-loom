@@ -47,7 +47,7 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
   @Override
   protected void genImports(ClassModel model, PrintWriter writer) {
     super.genImports(model, writer);
-    writer.println("import io.vertx.loom.core.Async;");
+    writer.println("import io.vertx.lang.loom.LoomAsync;");
   }
   
   @Override
@@ -90,7 +90,7 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
           String resultName = genTypeName(resultType);
           return "new Handler<AsyncResult<" + resultName + ">>() {\n" +
             "      public void handle(AsyncResult<" + resultName + "> ar) {\n" +
-            "        io.vertx.loom.core.Async.async(() -> {\n" +
+            "        io.vertx.lang.loom.LoomAsync.async(() -> {\n" +
             "          if (ar.succeeded()) {\n" +
             "            " + expr + ".handle(io.vertx.core.Future.succeededFuture(" + genConvReturn(resultType, method, "ar.result()") + "));\n" +
             "          } else {\n" +
@@ -103,7 +103,7 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
           String eventName = genTypeName(eventType);
           return "new Handler<" + eventName + ">() {\n" +
             "      public void handle(" + eventName + " event) {\n" +
-            "        io.vertx.loom.core.Async.async(() -> {\n" +
+            "        io.vertx.lang.loom.LoomAsync.async(() -> {\n" +
             "          " + expr + ".handle(" + genConvReturn(eventType, method, "event") + ");\n" +
             "        });\n" +
             "      }\n" +
