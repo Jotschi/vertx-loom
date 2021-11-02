@@ -17,50 +17,63 @@ import org.junit.rules.TestName;
 
 import io.vertx.codegen.CodeGenProcessor;
 import io.vertx.codegen.Compiler;
+import io.vertx.core.Vertx;
 import io.vertx.ext.web.Route;
+import io.vertx.ext.web.RoutingContext;
 
 public class LoomGeneratorTest {
 
-  private static File testDir;
+	private static File testDir;
 
-  @Rule
-  public final TestName name = new TestName();
+	@Rule
+	public final TestName name = new TestName();
 
-  @Before
-  public void before() throws Exception {
-    int count = 0;
-    while (true) {
-      String suffix = "testgen_" + name.getMethodName();
-      if (count > 0) {
-        suffix += "-" + count;
-      }
-      count++;
-      testDir = new File(new File("target").getAbsoluteFile(), suffix);
-      if (!testDir.exists()) {
-        assertTrue(testDir.mkdir());
-        break;
-      }
-    }
-  }
+	@Before
+	public void before() throws Exception {
+		int count = 0;
+		while (true) {
+			String suffix = "testgen_" + name.getMethodName();
+			if (count > 0) {
+				suffix += "-" + count;
+			}
+			count++;
+			testDir = new File(new File("target").getAbsoluteFile(), suffix);
+			if (!testDir.exists()) {
+				assertTrue(testDir.mkdir());
+				break;
+			}
+		}
+	}
 
-  private void assertCompile(String gen, Class... classes) throws Exception {
-    DiagnosticCollector<JavaFileObject> collector = new DiagnosticCollector<>();
-    Compiler compiler = new Compiler(new CodeGenProcessor(), collector);
-    compiler.addOption("-Acodegen.generators=" + gen);
-    compiler.addOption("-Acodegen.output=" + testDir.getAbsolutePath());
-    boolean result = compiler.compile(classes);
-    for (Diagnostic<? extends JavaFileObject> diag : collector.getDiagnostics()) {
-      System.err.println(diag.getPosition() + ":" + diag.getColumnNumber() + " @ " + diag.getMessage(Locale.ENGLISH));
-      System.err.println(diag.toString());
-    }
-    if (!result) {
-      fail("Compilation failed");
-    }
-  }
+	private void assertCompile(String gen, Class... classes) throws Exception {
+		DiagnosticCollector<JavaFileObject> collector = new DiagnosticCollector<>();
+		Compiler compiler = new Compiler(new CodeGenProcessor(), collector);
+		compiler.addOption("-Acodegen.generators=" + gen);
+		compiler.addOption("-Acodegen.output=" + testDir.getAbsolutePath());
+		boolean result = compiler.compile(classes);
+		for (Diagnostic<? extends JavaFileObject> diag : collector.getDiagnostics()) {
+			System.err.println(
+					diag.getPosition() + ":" + diag.getColumnNumber() + " @ " + diag.getMessage(Locale.ENGLISH));
+			System.err.println(diag.toString());
+		}
+		if (!result) {
+			fail("Compilation failed");
+		}
+	}
 
-  @Test
-  public void testRoute() throws Exception {
-    assertCompile("loom", Route.class);
-  }
+	@Test
+	public void testRoute() throws Exception {
+		assertCompile("Loom", Route.class);
+	}
+
+	@Test
+	public void testRoutingContext() throws Exception {
+		assertCompile("Loom", RoutingContext.class);
+	}
+
+	@Test
+	public void testVertx() throws Exception {
+		assertCompile("Loom", Vertx.class);
+	}
 
 }
