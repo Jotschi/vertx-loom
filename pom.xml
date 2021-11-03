@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.jotschi.vertx.loom</groupId>
 	<artifactId>vertx-loom-parent</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>4.2.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<properties>
