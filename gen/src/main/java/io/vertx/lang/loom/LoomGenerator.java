@@ -53,12 +53,6 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
   }
 
   @Override
-  protected void genImports(ClassModel model, PrintWriter writer) {
-    super.genImports(model, writer);
-    writer.println("import io.vertx.lang.loom.LoomAsync;");
-  }
-
-  @Override
   public String render(ClassModel model, int index, int size, Map<String, Object> session) {
     String output = super.render(model, index, size, session);
     // System.out.println(output);
@@ -106,7 +100,7 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
     // Delegate to AsyncLoom for static calls to Vertx#currentContext
     if (Vertx.class.getName().equals(model.getFqn()) && method.isStaticMethod()
       && method.getName().equals("currentContext")) {
-      return "io.vertx.lang.loom.LoomAsync.currentVertxContext()";
+      return "io.vertx.lang.loom.Async.currentVertxContext()";
     } else {
       return super.genInvokeDelegate(model, method);
     }
@@ -141,7 +135,7 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
           if (applyLoom) {
             return "new Handler<AsyncResult<" + resultName + ">>() {\n"
               + "      public void handle(AsyncResult<" + resultName + "> ar) {\n"
-              + "        io.vertx.lang.loom.LoomAsync.async(() -> {\n"
+              + "        io.vertx.lang.loom.Async.async(() -> {\n"
               + "          if (ar.succeeded()) {\n"
               + "            " + expr + ".handle(io.vertx.core.Future.succeededFuture(" + genConvReturn(model, resultType, method, "ar.result()") + "));\n"
               + "          } else {\n"
@@ -166,7 +160,7 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
           if (applyLoom) {
             return "new Handler<" + eventName + ">() {\n"
               + "      public void handle(" + eventName + " event) {\n"
-              + "        io.vertx.lang.loom.LoomAsync.async(() -> {\n"
+              + "        io.vertx.lang.loom.Async.async(() -> {\n"
               + "          " + expr + ".handle(" + genConvReturn(model, eventType, method, "event") + ");\n"
               + "        });\n"
               + "      }\n"

@@ -8,7 +8,7 @@ import java.util.concurrent.TimeUnit;
 import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.disposables.Disposable;
-import io.vertx.lang.loom.LoomAsync;
+import io.vertx.lang.loom.Async;
 import io.vertx.loom.rxjava3.LoomContextScheduler.LoomContextWorker.TimedAction;
 
 public class LoomContextScheduler extends Scheduler {
@@ -55,7 +55,7 @@ public class LoomContextScheduler extends Scheduler {
 			}
 
 			public void run() {
-				thread = LoomAsync.async(() -> {
+				thread = Async.async(() -> {
 					try {
 						// Thread sleep is safe in a virtual thread since loom will not block the
 						// carrier thread if doing so. Instead the loom scheduler will continue

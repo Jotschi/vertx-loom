@@ -14,7 +14,7 @@ import io.vertx.core.Future;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.lang.loom.LoomAsync;
+import io.vertx.lang.loom.Async;
 import io.vertx.loom.core.Vertx;
 import io.vertx.loom.ext.web.Router;
 
@@ -23,7 +23,7 @@ Router router = Router.router(vertx);
 // The handler method will automatically be invoked in a dedicated virtual thread when using the wrapper API within the `io.vertx.loom` packages.
 router.route("/test").handler(rc -> {
   // The await method can be used to wait until the async operation has completed
-  List<Long> userIds = LoomAsync.await(loadUserIds());
+  List<Long> userIds = Async.await(loadUserIds());
   JsonObject response = new JsonObject();
   response.put("userIds", new JsonArray(userIds));
   rc.end(response.encodePrettily());
@@ -31,14 +31,14 @@ router.route("/test").handler(rc -> {
 
 private Future<List<Long>> loadUserIds() {
   // Invoking async will run the code in new virtual thread and return a future
-  return LoomAsync.async(() -> {
+  return Async.async(() -> {
     Thread.sleep(100);
-    return LoomAsync.await(loadIdsFromDb());
+    return Async.await(loadIdsFromDb());
   });
 }
 
 private Future<List<Long>> loadIdsFromDb() {
-  return LoomAsync.async(() -> {
+  return Async.async(() -> {
     Thread.sleep(100);
     return Arrays.asList(1L, 2L, 3L, 42L);
   });
@@ -56,19 +56,19 @@ Nov 02, 2021 6:30:06 PM io.vertx.test.core.AsyncTestBase
 INFO: Starting test: UsecaseTest#testServer
 Exception in thread "vert.x-virtual-thread-0" java.lang.RuntimeException: java.lang.RuntimeException: java.lang.RuntimeException: Error
 	at io.vertx.lang.loom.Coroutine.await(Coroutine.java:48)
-	at io.vertx.lang.loom.LoomAsync.await(LoomAsync.java:60)
+	at io.vertx.lang.loom.Async.await(Async.java:60)
 	at io.vertx.core.it.UsecaseTest.lambda$0(UsecaseTest.java:25)
 	at io.vertx.loom.ext.web.Route$1.lambda$0(Route.java:174)
-	at io.vertx.lang.loom.LoomAsync.lambda$1(LoomAsync.java:76)
+	at io.vertx.lang.loom.Async.lambda$1(Async.java:76)
 	at java.base/java.lang.VirtualThread.run(VirtualThread.java:299)
 	at java.base/java.lang.VirtualThread$VThreadContinuation.lambda$new$0(VirtualThread.java:176)
 	at java.base/java.lang.Continuation.enter0(Continuation.java:372)
 	at java.base/java.lang.Continuation.enter(Continuation.java:365)
 Caused by: java.lang.RuntimeException: java.lang.RuntimeException: Error
 	at io.vertx.lang.loom.Coroutine.await(Coroutine.java:48)
-	at io.vertx.lang.loom.LoomAsync.await(LoomAsync.java:60)
+	at io.vertx.lang.loom.Async.await(Async.java:60)
 	at io.vertx.core.it.UsecaseTest.lambda$5(UsecaseTest.java:48)
-	at io.vertx.lang.loom.LoomAsync.lambda$0(LoomAsync.java:42)
+	at io.vertx.lang.loom.Async.lambda$0(Async.java:42)
 	... 4 more
 Caused by: java.lang.RuntimeException: Error
 	at io.vertx.core.it.UsecaseTest.lambda$6(UsecaseTest.java:57)
