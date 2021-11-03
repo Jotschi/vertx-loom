@@ -180,10 +180,8 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
         String retName = genTypeName(retType);
         return "new Function<" + argName + "," + retName + ">() {\n"
           + "      public " + retName + " apply(" + argName + " arg) {\n"
-          + "        " + genParamTypeDecl(retType) + " ret = " + expr + ".apply(" + genConvReturn(model, argType, method, "arg")
-          + ");\n"
-          + "        return "
-          + genConvParam(model, retType, method, "ret") + ";\n"
+          + "        " + genParamTypeDecl(retType) + " ret = " + expr + ".apply(" + genConvReturn(model, argType, method, "arg") + ");\n"
+          + "        return " + genConvParam(model, retType, method, "ret") + ";\n"
           + "      }\n"
           + "    }";
       } else if (kind == LIST || kind == SET) {
