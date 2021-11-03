@@ -35,8 +35,15 @@ import io.vertx.codegen.type.ParameterizedTypeInfo;
 import io.vertx.codegen.type.TypeInfo;
 import io.vertx.codegen.type.TypeVariableInfo;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.file.FileSystem;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.shareddata.SharedData;
+import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.web.Route;
+import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.lang.rx.AbstractBaseVertxGenerator;
 
 class LoomGenerator extends AbstractBaseVertxGenerator {
@@ -204,17 +211,21 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
    * @param model
    * @return
    */
-  private boolean checkForLoomSupport(ClassModel model) {
-    if (model.getFqn().equals(Vertx.class.getName())) {
-      return true;
-    }
-    if (model.getFqn().equals(Route.class.getName())) {
-      return true;
-    }
-    if (model.getFqn().equals(RoutingContext.class.getName())) {
-      return true;
-    }
-    return false;
+  protected boolean checkForLoomSupport(ClassModel model) {
+    return Stream.of(
+      Vertx.class,
+      Route.class,
+      EventBus.class,
+      Router.class,
+      SharedData.class,
+      AuthenticationProvider.class,
+      BodyHandler.class,
+      //HttpClient.class,
+      RoutingContext.class,
+      FileSystem.class)
+      .filter(clazz -> {
+        return model.getFqn().equals(clazz.getName());
+      }).findFirst().isPresent();
   }
 
   @Override
