@@ -71,7 +71,6 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
     genSimpleMethod("public", model, method, cacheDecls, genBody, writer);
 
     if (method.getKind() == MethodKind.CALLBACK) {
-
       MethodInfo copy = method.copy();
       copy.getParams().remove(copy.getParams().size() - 1);
       Optional<MethodInfo> any = Stream.concat(model.getMethods().stream(), model.getAnyJavaTypeMethods().stream())
@@ -110,6 +109,16 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
     } else {
       return super.genInvokeDelegate(model, method);
     }
+  }
+
+  @Override
+  protected boolean isSameType(TypeInfo type, MethodInfo method) {
+    ClassKind kind = type.getKind();
+    if (type.isParameterized() && kind == HANDLER) {
+      // We want also to generate async wrappers for methods with the same parameter types.
+      return false;
+    }
+    return super.isSameType(type, method);
   }
 
   @Override
