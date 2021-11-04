@@ -10,7 +10,8 @@ public class Helper {
   /**
    * Unwrap the type used in RxJava.
    *
-   * @param type the type to unwrap
+   * @param type
+   *          the type to unwrap
    * @return the unwrapped type
    */
   public static Class unwrap(Class<?> type) {
