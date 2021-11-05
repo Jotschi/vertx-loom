@@ -1,13 +1,12 @@
 package io.vertx.lang.loom;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
 import io.vertx.core.Context;
 import io.vertx.core.Future;
-import rx.Observable;
-import rx.Single;
 
 /**
  * await() must be run on a Virtual Thread. Whenever we block, the Virtual Thread will yield execution. So await() blocks until the Future.onComplete handler
@@ -57,70 +56,12 @@ class Coroutine {
 
   }
 
-  public <A> A await(io.reactivex.rxjava3.core.Observable<A> obs) {
-    lock.lock();
-    try {
-      AtomicReference<A> ref = new AtomicReference<>();
-      obs.subscribe(res -> {
-        // Future.onComplete can execute immediately,
-        // which would cause deadlock if we don't run it asynchronously.
-        vertxContext.runOnContext(voidd -> {
-          lock.lock();
-          try {
-            ref.set(res);
-            cond.signal();
-          } finally {
-            lock.unlock();
-          }
-        });
-
-      }, err -> {
-        throw new RuntimeException(err);
-      });
-
-      cond.await();
-
-      return ref.get();
-
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    } finally {
-      lock.unlock();
-    }
+  public <A> List<A> await(io.reactivex.rxjava3.core.Observable<A> obs) {
+    return await(obs.toList());
   }
 
-  public <A> A await(io.reactivex.Observable<A> obs) {
-    lock.lock();
-    try {
-      AtomicReference<A> ref = new AtomicReference<>();
-      obs.subscribe(res -> {
-        // Future.onComplete can execute immediately,
-        // which would cause deadlock if we don't run it asynchronously.
-        vertxContext.runOnContext(voidd -> {
-          lock.lock();
-          try {
-            ref.set(res);
-            cond.signal();
-          } finally {
-            lock.unlock();
-          }
-        });
-
-      }, err -> {
-        throw new RuntimeException(err);
-      });
-
-      cond.await();
-
-      return ref.get();
-
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    } finally {
-      lock.unlock();
-    }
+  public <A> List<A> await(io.reactivex.Observable<A> obs) {
+    return await(obs.toList());
   }
 
   public <A> A await(io.reactivex.Single<A> single) {

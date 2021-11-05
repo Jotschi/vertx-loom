@@ -1,10 +1,12 @@
 package io.vertx.lang.loom;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
+import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.core.Single;
 import io.vertx.core.Context;
@@ -48,6 +50,11 @@ public final class Async {
 
     return promise.future();
   }
+  
+  public static <A> List<A> await(Observable<A> obs) {
+    Coroutine coroutine = Objects.requireNonNull(AWAIT_CONTEXT.get(), "Must call await from inside an async scope");
+    return coroutine.await(obs);
+  }
 
   public static <A> A await(Single<A> single) {
     Coroutine coroutine = Objects.requireNonNull(AWAIT_CONTEXT.get(), "Must call await from inside an async scope");
@@ -56,7 +63,6 @@ public final class Async {
 
   public static <A> A await(Future<A> future) {
     Coroutine coroutine = Objects.requireNonNull(AWAIT_CONTEXT.get(), "Must call await from inside an async scope");
-
     return coroutine.await(future);
   }
 
