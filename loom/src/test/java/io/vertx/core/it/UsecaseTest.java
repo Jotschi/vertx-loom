@@ -28,9 +28,9 @@ public class UsecaseTest extends AsyncTestBase {
 			rc.end(response.encodePrettily());
 		});
 
-		vertx.createHttpServer().requestHandler(router).listen(8080, "localhost", onSuccess(s -> {
+		vertx.createHttpServer().requestHandler(router).listen(0, "localhost", onSuccess(s -> {
 			HttpClient client = vertx.createHttpClient();
-			client.request(HttpMethod.GET, 8080, "localhost", "/test", onSuccess(req -> {
+			client.request(HttpMethod.GET, s.actualPort(), "localhost", "/test", onSuccess(req -> {
 				req.send(onSuccess(resp -> {
 					resp.bodyHandler(buff -> {
 						assertNotNull(buff.toString());
@@ -54,7 +54,7 @@ public class UsecaseTest extends AsyncTestBase {
 		return Async.async(() -> {
 			Thread.sleep(100);
 			if (true) {
-				throw new RuntimeException("Error");
+//				throw new RuntimeException("Error");
 			}
 			return Arrays.asList(1L, 2L, 3L, 42L);
 		});

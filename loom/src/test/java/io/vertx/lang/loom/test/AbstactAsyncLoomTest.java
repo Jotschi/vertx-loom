@@ -35,6 +35,10 @@ public abstract class AbstactAsyncLoomTest {
     base.await(20, TimeUnit.SECONDS);
   }
 
+  public void waitFor(int duration, TimeUnit unit) {
+    base.await(duration, unit);
+  }
+
   public <T> Handler<AsyncResult<T>> onSuccess(Consumer<T> consumer) {
     return base.onSuccess(consumer);
   }
@@ -55,6 +59,12 @@ public abstract class AbstactAsyncLoomTest {
     assertTrue("The thread did not have the correct name. Got: " + thread.getName(), thread.getName().startsWith("vert.x-eventloop-thread-"));
     assertFalse("The current thread should not be virtual", thread.isVirtual());
     assertNotNull("The context could not be loaded.", Async.currentVertxContext());
+  }
+
+  public void expectVirtualEventloopThread() {
+    Thread thread = Thread.currentThread();
+    assertTrue("The thread did not have the correct name. Got: " + thread.getName(), thread.getName().startsWith("vert.x-eventloop-thread-"));
+    assertTrue("The current thread should be virtual", thread.isVirtual());
   }
 
 }

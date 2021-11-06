@@ -37,6 +37,10 @@ import io.vertx.codegen.type.TypeVariableInfo;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.file.FileSystem;
+import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpClientResponse;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.shareddata.SharedData;
 import io.vertx.ext.auth.authentication.AuthenticationProvider;
 import io.vertx.ext.web.Route;
@@ -220,6 +224,10 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
    * @return
    */
   protected boolean checkForLoomSupport(ClassModel model) {
+    if (true) {
+      return true;
+    }
+
     return Stream.of(
       Vertx.class,
       Route.class,
@@ -229,6 +237,9 @@ class LoomGenerator extends AbstractBaseVertxGenerator {
       AuthenticationProvider.class,
       BodyHandler.class,
       // HttpClient.class,
+      HttpServer.class,
+      // HttpClientResponse.class,
+      HttpServerResponse.class,
       RoutingContext.class,
       FileSystem.class)
       .filter(clazz -> {

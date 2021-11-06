@@ -13,6 +13,7 @@ import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
+import io.vertx.core.impl.ContextInternal;
 import io.vertx.loom.rxjava3.LoomContextScheduler;
 
 public final class Async {
@@ -20,7 +21,7 @@ public final class Async {
   private static final ThreadLocal<AsyncContext> ASYNC_CONTEXT = new ThreadLocal<>();
   private static final ThreadLocal<Coroutine> AWAIT_CONTEXT = new ThreadLocal<>();
 
-  private record AsyncContext(Context vertxContext, ThreadFactory vThreadFactory) {
+  private record AsyncContext(ContextInternal vertxContext, ThreadFactory vThreadFactory) {
   }
 
   private Async() {
@@ -94,6 +95,11 @@ public final class Async {
     return asyncContext.vertxContext;
   }
 
+  public static ContextInternal currentVertxContextInternal() {
+    AsyncContext asyncContext = ASYNC_CONTEXT.get();
+    return asyncContext.vertxContext;
+  }
+
   private static AsyncContext prepareAsyncContext() {
     Context vertxContext = Objects.requireNonNull(Vertx.currentContext(),
       "This thread needs a Vertx Context to use async/await");
@@ -107,7 +113,7 @@ public final class Async {
     ThreadFactory vtFactory = Thread.ofVirtual().name("vert.x-virtual-thread-", 0).scheduler(contextThreadExecutor)
       .factory();
 
-    AsyncContext asyncContext = new AsyncContext(vertxContext, vtFactory);
+    AsyncContext asyncContext = new AsyncContext((ContextInternal)vertxContext, vtFactory);
     ASYNC_CONTEXT.set(asyncContext);
     return asyncContext;
   }
