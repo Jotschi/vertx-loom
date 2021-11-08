@@ -7,8 +7,8 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-import io.vertx.loom.core.Vertx;
-import io.vertx.loom.core.file.FileSystem;
+import io.vertx.core.Vertx;
+import io.vertx.core.file.FileSystem;
 
 public class FilesystemTest extends AbstactAsyncLoomTest {
 

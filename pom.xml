@@ -16,7 +16,6 @@
 
 	<modules>
 		<module>loom</module>
-		<module>gen</module>
 	</modules>
 
 	<dependencyManagement>
@@ -29,13 +28,6 @@
 				<scope>import</scope>
 			</dependency>
 
-			<!-- Project modules -->
-			<dependency>
-				<groupId>de.jotschi.vertx.loom</groupId>
-				<artifactId>vertx-loom-gen</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-
 			<!-- Vert.x deps -->
 			<dependency>
 				<artifactId>vertx-rx-gen</artifactId>
@@ -45,11 +37,6 @@
 			<dependency>
 				<groupId>io.vertx</groupId>
 				<artifactId>vertx-rx-java3</artifactId>
-				<version>${vertx.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.vertx</groupId>
-				<artifactId>vertx-codegen</artifactId>
 				<version>${vertx.version}</version>
 			</dependency>
 			<dependency>
@@ -66,12 +53,6 @@
 				<groupId>io.vertx</groupId>
 				<artifactId>vertx-web</artifactId>
 				<version>${vertx.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.vertx</groupId>
-				<artifactId>vertx-codegen</artifactId>
-				<version>${vertx.version}</version>
-				<type>test-jar</type>
 			</dependency>
 
 			<!-- Test -->

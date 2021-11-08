@@ -60,43 +60,6 @@ class Coroutine {
     return await(obs.toList());
   }
 
-  public <A> List<A> await(io.reactivex.Observable<A> obs) {
-    return await(obs.toList());
-  }
-
-  public <A> A await(io.reactivex.Single<A> single) {
-    lock.lock();
-    try {
-      AtomicReference<A> ref = new AtomicReference<>();
-      single.subscribe(res -> {
-        // Future.onComplete can execute immediately,
-        // which would cause deadlock if we don't run it asynchronously.
-        vertxContext.runOnContext(voidd -> {
-          lock.lock();
-          try {
-            ref.set(res);
-            cond.signal();
-          } finally {
-            lock.unlock();
-          }
-        });
-
-      }, err -> {
-        throw new RuntimeException(err);
-      });
-
-      cond.await();
-
-      return ref.get();
-
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-      throw new RuntimeException(e);
-    } finally {
-      lock.unlock();
-    }
-  }
-
   public <A> A await(io.reactivex.rxjava3.core.Single<A> single) {
     lock.lock();
     try {

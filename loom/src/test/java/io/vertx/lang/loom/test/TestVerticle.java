@@ -1,7 +1,7 @@
 package io.vertx.lang.loom.test;
 
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
-import io.vertx.loom.core.AbstractVerticle;
 
 public class TestVerticle extends AbstractVerticle {
 

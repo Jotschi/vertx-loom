@@ -2,9 +2,9 @@ package io.vertx.lang.loom.test;
 
 import org.junit.Test;
 
+import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
-import io.vertx.loom.core.AbstractVerticle;
-import io.vertx.loom.core.Vertx;
+import io.vertx.core.Vertx;
 
 public class VerticleTest extends AbstactAsyncLoomTest {
 
