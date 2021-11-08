@@ -19,7 +19,7 @@ public class FilesystemTest extends AbstactAsyncLoomTest {
     Vertx vertx = Vertx.vertx();
     FileSystem fs = vertx.fileSystem();
     fs.chmod(tempFile.getAbsolutePath(), "rwxr-x---", onSuccess(r -> {
-      expectLoomThread();
+      expectVirtualEventloopThread();
       testComplete();
     }));
     waitFor();
@@ -32,7 +32,7 @@ public class FilesystemTest extends AbstactAsyncLoomTest {
     Vertx vertx = Vertx.vertx();
     FileSystem fs = vertx.fileSystem();
     fs.delete(tempFile.getAbsolutePath(), onSuccess(r -> {
-      expectLoomThread();
+      expectVirtualEventloopThread();
       assertFalse("File should be deleted", tempFile.exists());
       testComplete();
     }));

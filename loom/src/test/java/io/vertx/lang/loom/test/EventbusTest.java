@@ -12,7 +12,7 @@ public class EventbusTest extends AbstactAsyncLoomTest {
     Vertx vertx = Vertx.vertx();
     EventBus eb = vertx.eventBus();
     eb.consumer("test", msg -> {
-      expectLoomThread();
+      expectVirtualEventloopThread();
       testComplete();
     });
     eb.publish("test", "dummy");

@@ -13,7 +13,7 @@ public class HttpServerTest extends AbstactAsyncLoomTest {
     Router router = Router.router(vertx);
 
     vertx.createHttpServer().requestHandler(router).listen(0, "localhost", onSuccess(s -> {
-      expectLoomThread();
+      expectVirtualEventloopThread();
       testComplete();
     }));
     waitFor();

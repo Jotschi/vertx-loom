@@ -23,11 +23,12 @@ public class HttpClientTest extends AbstactAsyncLoomTest {
     vertx.createHttpServer().requestHandler(router).listen(0, "localhost", onSuccess(s -> {
       HttpClient client = vertx.createHttpClient();
       client.request(HttpMethod.GET, s.actualPort(), "localhost", "/test", onSuccess(req -> {
+        expectVirtualEventloopThread();
         req.send(onSuccess(resp -> {
+          expectVirtualEventloopThread();
           resp.bodyHandler(buff -> {
             assertNotNull(buff.toString());
-            // TODO Fails because http client is currently excluded from loomification
-            expectLoomThread();
+            expectVirtualEventloopThread();
             testComplete();
           });
         }));
