@@ -2,8 +2,8 @@ package io.vertx.lang.loom.test;
 
 import org.junit.Test;
 
-import io.vertx.loom.core.Vertx;
-import io.vertx.loom.ext.web.Router;
+import io.vertx.core.Vertx;
+import io.vertx.ext.web.Router;
 
 public class HttpServerTest extends AbstactAsyncLoomTest {
 

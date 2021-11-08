@@ -1,4 +1,4 @@
-package io.vertx.loom.rxjava3;
+package io.vertx.lang.loom.rxjava3;
 
 import java.time.Duration;
 import java.util.HashSet;
@@ -9,7 +9,7 @@ import io.reactivex.rxjava3.annotations.NonNull;
 import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.vertx.lang.loom.Async;
-import io.vertx.loom.rxjava3.LoomContextScheduler.LoomContextWorker.TimedAction;
+import io.vertx.lang.loom.rxjava3.LoomContextScheduler.LoomContextWorker.TimedAction;
 
 public class LoomContextScheduler extends Scheduler {
 

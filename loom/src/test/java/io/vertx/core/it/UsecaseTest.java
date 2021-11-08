@@ -6,13 +6,13 @@ import java.util.List;
 import org.junit.Test;
 
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.Router;
 import io.vertx.lang.loom.Async;
-import io.vertx.loom.core.Vertx;
-import io.vertx.loom.core.http.HttpClient;
-import io.vertx.loom.ext.web.Router;
 import io.vertx.test.core.AsyncTestBase;;
 
 public class UsecaseTest extends AsyncTestBase {

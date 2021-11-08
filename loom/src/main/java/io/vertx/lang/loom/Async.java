@@ -14,7 +14,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.ContextInternal;
-import io.vertx.loom.rxjava3.LoomContextScheduler;
+import io.vertx.lang.loom.rxjava3.LoomContextScheduler;
 
 public final class Async {
 
