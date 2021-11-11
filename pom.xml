@@ -11,7 +11,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<vertx.version>4.2.1-SNAPSHOT</vertx.version>
+		<vertx.version>4.2.0-SNAPSHOT</vertx.version>
+		<vertx.release_version>4.2.0</vertx.release_version>
 	</properties>
 
 	<modules>
@@ -52,7 +53,7 @@
 			<dependency>
 				<groupId>io.vertx</groupId>
 				<artifactId>vertx-web</artifactId>
-				<version>${vertx.version}</version>
+				<version>${vertx.release_version}</version>
 			</dependency>
 
 			<!-- Test -->

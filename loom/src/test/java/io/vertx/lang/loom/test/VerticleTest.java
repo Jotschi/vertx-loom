@@ -14,11 +14,12 @@ public class VerticleTest extends AbstactAsyncLoomTest {
     vertx.deployVerticle(new AbstractVerticle() {
       @Override
       public void start(Promise<Void> startPromise) throws Exception {
-        expectLoomThread();
+        expectVirtualEventloopThread();
         startPromise.complete();
+        testComplete();
       }
     }, onSuccess(deploymentId -> {
-      expectLoomThread();
+      expectVirtualEventloopThread();
     }));
     waitFor();
   }
@@ -29,13 +30,13 @@ public class VerticleTest extends AbstactAsyncLoomTest {
     vertx.deployVerticle(new AbstractVerticle() {
       @Override
       public void stop(Promise<Void> stopPromise) throws Exception {
-        expectLoomThread();
+        expectVirtualEventloopThread();
         stopPromise.complete();
       }
     }, onSuccess(deploymentId -> {
-      expectLoomThread();
+      expectVirtualEventloopThread();
       vertx.undeploy(deploymentId, onSuccess(v -> {
-        expectLoomThread();
+        expectVirtualEventloopThread();
         testComplete();
       }));
     }));

@@ -10,7 +10,7 @@ public class VertxTest extends AbstactAsyncLoomTest {
   public void testRunOnContext() {
     Vertx vertx = Vertx.vertx();
     vertx.runOnContext(v -> {
-      expectLoomThread();
+      expectVirtualEventloopThread();
       testComplete();
     });
     waitFor();
@@ -20,7 +20,7 @@ public class VertxTest extends AbstactAsyncLoomTest {
   public void testSetPeriodic() {
     Vertx vertx = Vertx.vertx();
     vertx.setPeriodic(500, t -> {
-      expectLoomThread();
+      expectVirtualEventloopThread();
       vertx.cancelTimer(t.intValue());
       testComplete();
     });
@@ -31,7 +31,7 @@ public class VertxTest extends AbstactAsyncLoomTest {
   public void testSetTimer() {
     Vertx vertx = Vertx.vertx();
     vertx.setTimer(500, t -> {
-      expectLoomThread();
+      expectVirtualEventloopThread();
       testComplete();
     });
     waitFor();
@@ -41,7 +41,7 @@ public class VertxTest extends AbstactAsyncLoomTest {
   public void testDeployVerticle() {
     Vertx vertx = Vertx.vertx();
     vertx.deployVerticle(TestVerticle.class.getName(), onSuccess((String deploymentId) -> {
-      expectLoomThread();
+      expectVirtualEventloopThread();
       testComplete();
     }));
     waitFor();
@@ -51,9 +51,9 @@ public class VertxTest extends AbstactAsyncLoomTest {
   public void testUndeployVerticle() {
     Vertx vertx = Vertx.vertx();
     vertx.deployVerticle(new TestVerticle(), onSuccess(deploymentId -> {
-      expectLoomThread();
+      expectVirtualEventloopThread();
       vertx.undeploy(deploymentId, onSuccess(v -> {
-        expectLoomThread();
+        expectVirtualEventloopThread();
         testComplete();
       }));
     }));
