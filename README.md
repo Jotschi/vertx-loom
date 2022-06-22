@@ -1,6 +1,6 @@
 # Disclaimer
 
-Work on this PoC has __concluded__. A dedicated [Discord Channel](https://vertx.io/channels/) has been setup to discuss further ideas around Vert.x and Loom.
+Work on this PoC has __concluded__. A dedicated Loom Channel has been setup in the [Vert.x Discord Server](https://vertx.io/channels/) to discuss further ideas around Vert.x and Loom.
 
 ## Vert.x Loom Wrapper Codegen
 
