@@ -1,4 +1,8 @@
-# Vert.x Loom Wrapper Codegen
+# Disclaimer
+
+Work on this PoC has __concluded__. A dedicated [Discord Channel](https://vertx.io/channels/) has been setup to discuss further ideas around Vert.x and Loom.
+
+## Vert.x Loom Wrapper Codegen
 
 This project contains a proof of concept implementation for a codegen wrapper API that provides virtual async-await support to Vert.x
 
